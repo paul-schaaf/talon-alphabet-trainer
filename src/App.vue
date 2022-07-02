@@ -43,92 +43,109 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, Ref, ref } from "vue";
+<script setup lang="ts">
+import { onMounted, Ref, ref, watch } from "vue";
 import * as ProgressBar from "progressbar.js";
 
-export default defineComponent({
-  name: "App",
-  setup() {
-    const alphabet = [
-      "a",
-      "b",
-      "c",
-      "d",
-      "e",
-      "f",
-      "g",
-      "h",
-      "i",
-      "j",
-      "k",
-      "l",
-      "m",
-      "n",
-      "o",
-      "p",
-      "q",
-      "r",
-      "s",
-      "t",
-      "u",
-      "v",
-      "w",
-      "x",
-      "y",
-      "z",
-    ];
-    const createProgressBar = () => {
-      const bar = new ProgressBar.Line("#container", {
-        strokeWidth: 4,
-        easing: "linear",
-        duration: 2000,
-        color: "blue",
-        trailColor: "#eee",
-        svgStyle: { width: "100%", height: "100%" },
-      });
-      bar.animate(1.0);
-      return bar;
-    };
-    let counter = 0;
-    const getLetter = () => {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const newLetter = alphabet[Math.floor(Math.random() * 26)];
-        if (newLetter !== letter.value) {
-          return newLetter;
-        }
-      }
-    };
-    const letter = ref("") as Ref<string | number>;
-    const inputLetter = ref("");
-    const input = ref(null as unknown as HTMLElement);
-    let bar: any = null;
-    onMounted(() => {
-      letter.value = getLetter();
-      input.value.focus();
-      const letterInterval = setInterval(() => {
+const alphabet = [
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z",
+];
+const createProgressBar = () => {
+  const bar = new ProgressBar.Line("#container", {
+    strokeWidth: 4,
+    easing: "linear",
+    duration: 2000,
+    color: "blue",
+    trailColor: "#eee",
+    svgStyle: { width: "100%", height: "100%" },
+  });
+  bar.animate(1.0);
+  return bar;
+};
+let counter = 0;
+const getLetter = () => {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const newLetter = alphabet[Math.floor(Math.random() * 26)];
+    if (newLetter !== letter.value) {
+      return newLetter;
+    }
+  }
+};
+const letter = ref("") as Ref<string | number>;
+const inputLetter = ref("");
+const input = ref(null as unknown as HTMLElement);
+let bar: any = null;
+let letterInterval: any = null;
+let gameOver = false;
+watch(inputLetter, (newLetter) => {
+  if (gameOver !== true) {
+    if (newLetter !== "") {
+      if (newLetter === letter.value) {
+        clearTimeout(letterInterval);
         bar.destroy();
-        if (letter.value === inputLetter.value) {
-          letter.value = getLetter();
-          input.value.focus();
-          inputLetter.value = "";
-          counter += 1;
-          bar = createProgressBar();
-        } else {
-          clearInterval(letterInterval);
+        letter.value = getLetter();
+        input.value.focus();
+        inputLetter.value = "";
+        counter += 1;
+        bar = createProgressBar();
+      } else {
+        clearTimeout(letterInterval);
+        letter.value = counter;
+        gameOver = true;
+        bar.destroy();
+      }
+      letterInterval = setTimeout(() => {
+        if (newLetter !== letter.value) {
+          clearTimeout(letterInterval);
           letter.value = counter;
+          gameOver = true;
+          bar.destroy();
         }
       }, 2000);
-
-      bar = createProgressBar();
-    });
-
-    return { letter, input, inputLetter };
-  },
+    }
+  }
+});
+onMounted(() => {
+  input.value.focus();
+  letter.value = getLetter();
+  inputLetter.value = "";
+  bar = createProgressBar();
+  letterInterval = setTimeout(() => {
+    if (inputLetter.value !== letter.value) {
+      clearTimeout(letterInterval);
+      letter.value = counter;
+      gameOver = true;
+      bar.destroy();
+    }
+  }, 2000);
 });
 </script>
-
 <style>
 * {
   margin: 0;
