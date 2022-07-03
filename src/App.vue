@@ -14,6 +14,7 @@
       height: 100vh;
     "
   >
+    <p v-if="gameOver">Your score is:</p>
     <div
       style="
         border: 5px solid orange;
@@ -100,11 +101,14 @@ const getLetter = () => {
 const letter = ref("") as Ref<string | number>;
 const inputLetter = ref("");
 const input = ref(null as unknown as HTMLElement);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let bar: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let letterInterval: any = null;
-let gameOver = false;
+let gameOver = ref(false);
+
 watch(inputLetter, (newLetter) => {
-  if (gameOver !== true) {
+  if (gameOver.value !== true) {
     if (newLetter !== "") {
       if (newLetter === letter.value) {
         clearTimeout(letterInterval);
@@ -117,20 +121,21 @@ watch(inputLetter, (newLetter) => {
       } else {
         clearTimeout(letterInterval);
         letter.value = counter;
-        gameOver = true;
+        gameOver.value = true;
         bar.destroy();
       }
       letterInterval = setTimeout(() => {
         if (newLetter !== letter.value) {
           clearTimeout(letterInterval);
           letter.value = counter;
-          gameOver = true;
+          gameOver.value = true;
           bar.destroy();
         }
       }, 2000);
     }
   }
 });
+
 onMounted(() => {
   input.value.focus();
   letter.value = getLetter();
@@ -140,7 +145,7 @@ onMounted(() => {
     if (inputLetter.value !== letter.value) {
       clearTimeout(letterInterval);
       letter.value = counter;
-      gameOver = true;
+      gameOver.value = true;
       bar.destroy();
     }
   }, 2000);
